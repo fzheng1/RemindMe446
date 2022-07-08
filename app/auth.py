@@ -21,7 +21,14 @@ def login():
     
     # if the above check passes, then we know the user has the right credentials
     login_user(user, remember=False)
-    return (jsonify(user.as_dict()), 200)
+    return (jsonify(user.to_dict()), 200)
+
+@auth.route('/logout')
+@login_required
+def logout():
+    name = current_user.name
+    logout_user()
+    return f'{name} logged out'
 
 @auth.route('/signup', methods=['POST'])
 def signup_post():
@@ -33,7 +40,7 @@ def signup_post():
     user = User.query.filter_by(email=email).first() # if this returns a user, then the email already exists in database
 
     if user: # if a user is found, we want to redirect back to signup page so user can try again
-        return (jsonify(user.as_dict()), 200)
+        return (jsonify(user.to_dict()), 200)
 
     # create a new user with the form data. Hash the password
     new_user = User(email=email, name=name, password=generate_password_hash(password, method='sha256'))
@@ -41,11 +48,63 @@ def signup_post():
     db.session.add(new_user)
     db.session.commit()
     
-    return (jsonify(new_user.as_dict()), 201)
+    return (jsonify(new_user.to_dict()), 201)
 
-@auth.route('/logout')
+@auth.route('/users', methods=['GET'])
 @login_required
-def logout():
-    name = current_user.name
+def get_users():
+    args = request.args
+    
+    # if we search by id we return a single user
+    if args.get("id", default=0, type=int):
+        users = User.query.filter_by(id=args.get("id", default=0, type=int))
+        print(args.get("id", default=0, type=int))
+        print(str(users))
+        return (jsonify(users.first().to_dict()), 200)
+    
+    # query by group
+    if args.get("group_id", default=0, type=int):
+        users = User.query.filter_by(group_id=args.get("group_id", default=0, type=int))
+        print(args.get("group_id", default=0, type=int))
+        print(str(users))
+        return (jsonify([u.to_dict() for u in users.all()]), 200)
+    
+    users = User.query
+    return (jsonify([u.to_dict() for u in users.all()]), 200)
+
+@auth.route('/user', methods=['PATCH'])
+@login_required
+def update_user():
+    user = User.query.filter_by(id=current_user.id).first()
+    
+    name = request.form.get('name')
+    password = request.form.get('password')
+    group_id = request.form.get('group_id', default=0, type=int)
+    
+
+    if name:
+        user.name = name
+    if password:
+        user.password = generate_password_hash(password, method='sha256')
+    if group_id:
+        user.group_id = group_id
+    
+    db.session.commit()
+    
+    return (jsonify(user.to_dict()), 200)
+    
+
+# logs out and deletes the current user
+@auth.route('/user', methods=['DELETE'])
+@login_required
+def delete_user():
+    user = User.query.filter_by(id=current_user.id).first()
+    ret = jsonify(user.to_dict())
     logout_user()
-    return f'{name} logged out'
+    
+    db.session.delete(user)
+    db.session.commit()
+    
+    
+    return (ret, 200)
+    

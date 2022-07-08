@@ -13,6 +13,28 @@ def home():
 @core.route("/whoami", methods=['GET'])
 @login_required
 def whoami():
-  return "index"
+  return (jsonify(current_user.to_dict()), 200)
 
 
+######
+# GROUPS CRUD
+######
+# TODO
+
+
+######
+# GROUPS LOGIC
+######
+# TODO
+
+
+######
+# CHORE CRUD
+######
+# TODO
+
+
+######
+# CHORE LOGIC
+######
+# TODO
