@@ -1,4 +1,5 @@
 from email.policy import default
+from enum import unique
 from flask_login import UserMixin
 from . import db
 from sqlalchemy.sql import func
@@ -24,7 +25,7 @@ class Group(db.Model):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
     
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
+    name = db.Column(db.String(100), unique=True)
     description = db.Column(db.String(2000))
     users = db.relationship('User', backref='group')
     responsibilities = db.relationship('Responsibility', backref='group')

@@ -38,20 +38,16 @@ def get_groups() -> List[Dict]:
 @core.route('/group', methods=['POST'])
 @login_required
 def create_group() -> Dict:
-  user_ids = request.form.get('user_ids')
   name = request.form.get('name')
-  description = request.form.get('description')
-  
-  users = User.query.filter(User.id.in_([int(x) for x in user_ids])).all()
-  
-  # make sure we are adding real users
-  if len(users) != len(user_ids):
-    return (jsonify({"ERROR":"TRIED TO ADD INVALID USER"}), 400)
+  description = request.form.get('description', default="")
 
   # we should enforce that a user can only be in 1 group at a time
-  for user in users:
-    if user.group_id:
-      return (jsonify({"ERROR":"USER ALREADY IN GROUP"}), 400)
+  if current_user.group_id:
+    return (jsonify({"ERROR":"USER ALREADY IN GROUP"}), 400)
+  
+  # group names should be unique
+  if Group.query.filter_by(name=name).first():
+    return (jsonify({"ERROR":"GROUP NAME ALREADY TAKEN"}), 400)
   
   # create a new group with the form data.
   new_group = Group(name=name, description=description)
@@ -60,8 +56,7 @@ def create_group() -> Dict:
   db.session.flush()
   
   # set each user's group_id to the new group
-  for user in users:
-    user.group_id = new_group.id
+  current_user.group_id = new_group.id
 
   db.session.commit()
   
@@ -80,16 +75,14 @@ def get_group() -> Dict:
 @core.route('/leave_group', methods=['DELETE'])
 @login_required
 def leave_group() -> Dict:
-  user = User.query.filter_by(id=current_user.id).first()
-  
   # make sure user is in a group
-  if user.group_id == 0:
+  if current_user.group_id == 0:
     return (jsonify({"ERROR": "USER IS NOT IN GROUP"}), 400)
   
-  group = user.group
+  group = current_user.group
   
   # leave the group
-  user.group_id = None
+  current_user.group_id = None
   
   # if the group has no users we can delete the group
   if not User.query.filter_by(group_id=group.id).all():
@@ -97,7 +90,7 @@ def leave_group() -> Dict:
   
   db.session.commit()
   
-  return (jsonify(user.to_dict()), 200)
+  return (jsonify(current_user.to_dict()), 200)
 
 
 @core.route('/join_group', methods=['POST'])
@@ -110,14 +103,12 @@ def join_group() -> Dict:
   if not group:
     return (jsonify({"ERROR": "GROUP DOES NOT EXIST"}), 400)
   
-  user = User.query.filter_by(id=current_user.id).first()
-  
   # join the group
-  user.group_id = int(group_id)
+  current_user.group_id = int(group_id)
   
   db.session.commit()
   
-  return (jsonify(user.to_dict()), 200)
+  return (jsonify(current_user.to_dict()), 200)
 
 
 ######
