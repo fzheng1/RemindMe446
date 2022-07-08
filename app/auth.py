@@ -1,14 +1,16 @@
 from flask import Blueprint, jsonify, request
 from flask_login import login_user, login_required, logout_user, current_user
+from sqlalchemy import desc
 from werkzeug.security import generate_password_hash, check_password_hash
 from .models import User
 from . import db
+from typing import List, Dict
 
 
 auth = Blueprint('auth', __name__)
 
 @auth.route('/login', methods=["POST"])
-def login():
+def login() -> Dict:
     email = request.form.get('email')
     password = request.form.get('password')
 
@@ -25,13 +27,13 @@ def login():
 
 @auth.route('/logout')
 @login_required
-def logout():
+def logout() -> str:
     name = current_user.name
     logout_user()
     return f'{name} logged out'
 
 @auth.route('/signup', methods=['POST'])
-def signup_post():
+def signup_post() -> Dict:
     # code to validate and add user to database goes here
     email = request.form.get('email')
     name = request.form.get('name')
@@ -52,7 +54,7 @@ def signup_post():
 
 @auth.route('/users', methods=['GET'])
 @login_required
-def get_users():
+def get_users() -> List[Dict]:
     args = request.args
     
     # if we search by id we return a single user
@@ -60,7 +62,7 @@ def get_users():
         users = User.query.filter_by(id=args.get("id", default=0, type=int))
         print(args.get("id", default=0, type=int))
         print(str(users))
-        return (jsonify(users.first().to_dict()), 200)
+        return (jsonify([users.first().to_dict()]), 200)
     
     # query by group
     if args.get("group_id", default=0, type=int):
@@ -74,20 +76,19 @@ def get_users():
 
 @auth.route('/user', methods=['PATCH'])
 @login_required
-def update_user():
+def update_user() -> Dict:
     user = User.query.filter_by(id=current_user.id).first()
     
     name = request.form.get('name')
     password = request.form.get('password')
-    group_id = request.form.get('group_id', default=0, type=int)
+    description = request.form.get('description', default=0, type=int)
     
-
     if name:
         user.name = name
     if password:
         user.password = generate_password_hash(password, method='sha256')
-    if group_id:
-        user.group_id = group_id
+    if description:
+        user.about = description
     
     db.session.commit()
     
@@ -97,7 +98,7 @@ def update_user():
 # logs out and deletes the current user
 @auth.route('/user', methods=['DELETE'])
 @login_required
-def delete_user():
+def delete_user() -> Dict:
     user = User.query.filter_by(id=current_user.id).first()
     ret = jsonify(user.to_dict())
     logout_user()
