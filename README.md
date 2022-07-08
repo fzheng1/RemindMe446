@@ -15,4 +15,5 @@ Steps to startup:
    5. exit the console, there should be a `db.sqlite` file in your `app` folder
 6. run `flask run` from the repo's root folder `RemindMe446`. You should see something like "http://127.0.0.1:5000", you should now be able to interact with the app on localhost "http://localhost:5000"
 7. Franklin has a postman collection for the endpoints to test with he is sometimes willing to share
-8. idk go nuts I hope we can finish
+8. to setup postman just make an environment and set base_url to the hostname you got in step 6
+9. idk go nuts I hope we can finish
