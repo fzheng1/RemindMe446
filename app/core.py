@@ -38,11 +38,15 @@ def get_groups() -> List[Dict]:
 @core.route('/group', methods=['POST'])
 @login_required
 def create_group() -> Dict:
-  user_ids = request.form.get('user_ids', type=List)
+  user_ids = request.form.get('user_ids')
   name = request.form.get('name')
   description = request.form.get('description')
   
   users = User.query.filter(User.id.in_([int(x) for x in user_ids])).all()
+  
+  # make sure we are adding real users
+  if len(users) != len(user_ids):
+    return (jsonify({"ERROR":"TRIED TO ADD INVALID USER"}), 400)
 
   # we should enforce that a user can only be in 1 group at a time
   for user in users:
@@ -51,12 +55,14 @@ def create_group() -> Dict:
   
   # create a new group with the form data.
   new_group = Group(name=name, description=description)
+    
+  db.session.add(new_group)
+  db.session.flush()
   
   # set each user's group_id to the new group
   for user in users:
     user.group_id = new_group.id
 
-  db.session.add(new_group)
   db.session.commit()
   
   return (jsonify(new_group.to_dict()), 201)
@@ -65,7 +71,10 @@ def create_group() -> Dict:
 @core.route('/group', methods=['GET'])
 @login_required
 def get_group() -> Dict:
-  return (jsonify(current_user.group.to_dict()), 200)
+  group = current_user.group
+  group = group.to_dict() if group else {}
+  
+  return (jsonify(group), 200)
 
 
 @core.route('/leave_group', methods=['DELETE'])
@@ -80,12 +89,13 @@ def leave_group() -> Dict:
   group = user.group
   
   # leave the group
-  user.group_id = 0
+  user.group_id = None
   
   # if the group has no users we can delete the group
   if not User.query.filter_by(group_id=group.id).all():
     db.session.delete(group)
-    db.session.commit()
+  
+  db.session.commit()
   
   return (jsonify(user.to_dict()), 200)
 
@@ -104,6 +114,8 @@ def join_group() -> Dict:
   
   # join the group
   user.group_id = int(group_id)
+  
+  db.session.commit()
   
   return (jsonify(user.to_dict()), 200)
 

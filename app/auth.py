@@ -38,6 +38,7 @@ def signup_post() -> Dict:
     email = request.form.get('email')
     name = request.form.get('name')
     password = request.form.get('password')
+    about = request.form.get('about')
 
     user = User.query.filter_by(email=email).first() # if this returns a user, then the email already exists in database
 
@@ -45,7 +46,12 @@ def signup_post() -> Dict:
         return (jsonify(user.to_dict()), 200)
 
     # create a new user with the form data. Hash the password
-    new_user = User(email=email, name=name, password=generate_password_hash(password, method='sha256'))
+    new_user = User(
+        email=email,
+        name=name,
+        password=generate_password_hash(password, method='sha256'),
+        about=about
+    )
 
     db.session.add(new_user)
     db.session.commit()
@@ -81,14 +87,14 @@ def update_user() -> Dict:
     
     name = request.form.get('name')
     password = request.form.get('password')
-    description = request.form.get('description', default=0, type=int)
+    about = request.form.get('about', default=0, type=int)
     
     if name:
         user.name = name
     if password:
         user.password = generate_password_hash(password, method='sha256')
-    if description:
-        user.about = description
+    if about:
+        user.about = about
     
     db.session.commit()
     
