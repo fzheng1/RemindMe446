@@ -1,5 +1,4 @@
 
-from typing import List
 from flask import Flask, Blueprint, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import login_required, current_user

@@ -31,6 +31,10 @@ def create_app():
     # blueprint for core
     from .core import core as core_blueprint
     app.register_blueprint(core_blueprint)
+    
+    # chore for core
+    from .reponsibility import chore as chore_blueprint
+    app.register_blueprint(chore_blueprint)
 
     return app
 
