@@ -8,23 +8,23 @@ from typing import List, Dict
 
 core = Blueprint('core', __name__)
 
+# just a base placeholder to see if the app is online
 @core.route("/", methods=['GET'])
 def home():
-  return "index"
+  return "CS446!!!"
 
+# returns current user
 @core.route("/whoami", methods=['GET'])
 @login_required
 def whoami() -> Dict:
   return (jsonify(current_user.to_dict()), 200)
 
 
-######
-# GROUPS CRUD
-######
-
 ####################
 # PUBLIC FUNCTIONS
 ####################
+
+# Get all groups
 @core.route('/groups', methods=['GET'])
 def get_groups() -> List[Dict]:
   groups = Group.query.all()
@@ -34,6 +34,8 @@ def get_groups() -> List[Dict]:
 ####################
 # PRIVATE FUNCTIONS
 ####################
+
+# Create a group for users not already in groups
 @core.route('/group', methods=['POST'])
 @login_required
 def create_group() -> Dict:
@@ -62,6 +64,7 @@ def create_group() -> Dict:
   return (jsonify(new_group.to_dict()), 201)
 
 
+# Get the user's current group
 @core.route('/group', methods=['GET'])
 @login_required
 def get_group() -> Dict:
@@ -70,7 +73,9 @@ def get_group() -> Dict:
   
   return (jsonify(group), 200)
 
-
+# Leave a group, if a group is empty, delete it and it's chores
+# TODO: when leave a group, set all assigned chores to unassigned
+# TODO: when leave a group as last person, delete all chores for that group
 @core.route('/leave_group', methods=['DELETE'])
 @login_required
 def leave_group() -> Dict:
@@ -108,14 +113,4 @@ def join_group() -> Dict:
   db.session.commit()
   
   return (jsonify(current_user.to_dict()), 200)
-
-
-######
-# CHORE CRUD
-# we can do this with classes maybe?
-######
-# create_chore():
-# assign_chore():
-# complete_chore():
-# list_chores [completed, incomplete (ASSIGNED, NOT DONE)] [all, by_group]
 

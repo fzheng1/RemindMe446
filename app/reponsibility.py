@@ -19,16 +19,11 @@ chore = Blueprint('chore', __name__)
 @login_required
 def create_chore() -> Dict:
     name = request.form.get('name')
-    type = request.form.get('type')
     description = request.form.get('description', default="")
     deadline = request.form.get('deadline')
-    assignee = request.form.get('assignee')
+    assignee = request.form.get('assignee', default=None)
     group_id = current_user.group_id
     
-    # if type == 1 ...
-    # ...
-    # else:
-    # other category
     new_chore = Responsibility(
         name = name,
         description = description, 
@@ -43,39 +38,56 @@ def create_chore() -> Dict:
     return (jsonify(new_chore.to_dict()), 201)
     
 # View Chores
-@chore.route('/chores', methods=['GET'])
+@chore.route('/my_chores', methods=['GET'])
 @login_required
-def view_chores() -> Dict:
-    
-    
-    # if type == 1 ...
-    # ...
-    # else:
-    # other category
-    
+def view_my_chores() -> Dict:
     chores = Responsibility.query.filter_by(assignee=current_user.id).all()
 
     return (jsonify([c.to_dict() for c in chores.all()]), 200)
 
-# Update Chore
+@chore.route('/group_chores', methods=['GET'])
+@login_required
+def view_group_chores() -> Dict:
+    chores = Responsibility.query.filter_by(group_id=current_user.group_id).all()
+    return (jsonify([c.to_dict() for c in chores.all()]), 200)
+
+# Update Chore / mark chore as complete
 @chore.route('/chore', methods=['PATCH'])
 @login_required
 def update_chore() -> Dict:
-    pass
+    id = request.form.get('id')
+    name = request.form.get('name')
+    description = request.form.get('description')
+    deadline = request.form.get('deadline')
+    assignee = request.form.get('assignee')
+    completed = request.form.get('completed', default=False)
 
+    chore = Responsibility.query.filter_by(id=id)
+    
+    if name:
+        chore.name = name
+    if description:
+        chore.description = description
+    if deadline:
+        chore.deadline = deadline # not sure if this is datetime object might have to cast it
+    if assignee:
+        chore.assignee = int(assignee)
+    if completed:
+        chore.completed_at = datetime.now()
+    
+    db.session.commit()
+    
+    return (jsonify(chore.to_dict()), 200)
 
 # Delete Chore
-# can only delete incomplete chores
 @chore.route('/chore', methods=['DELETE'])
 @login_required
 def delete_chore() -> Dict:
     id = request.form.get('id')
-    type = request.form.get('type')
     
     chore = Responsibility.query.filter_by(id=id)
     chore.completed_at = datetime.now()
     
     db.session.commit()
-    
     
     return (jsonify(chore.to_dict()), 200)
