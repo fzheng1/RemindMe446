@@ -22,6 +22,7 @@ def create_chore() -> Dict:
     description = request.form.get('description', default="")
     deadline = request.form.get('deadline')
     assignee = request.form.get('assignee', default=None)
+    assignee = assignee if assignee else None
     group_id = current_user.group_id
     
     new_chore = Responsibility(

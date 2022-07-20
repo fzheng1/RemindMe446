@@ -15,6 +15,7 @@ class User(UserMixin, db.Model):
     name = db.Column(db.String(100))
     about = db.Column(db.String(2000))
     mmr = db.Column(db.Integer, default=0)
+    token = db.Column(db.String(100))
     group_id = db.Column(db.Integer, db.ForeignKey('group.id'))
     responsibilities = db.relationship('Responsibility', backref='user')
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
