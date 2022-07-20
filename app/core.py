@@ -5,8 +5,10 @@ from flask_login import login_required, current_user
 from .models import User, Group, Responsibility
 from . import db
 from typing import List, Dict
+from pyfcm import FCMNotification
 
 core = Blueprint('core', __name__)
+app = Flask(__name__)
 
 # just a base placeholder to see if the app is online
 @core.route("/", methods=['GET'])
@@ -114,3 +116,29 @@ def join_group() -> Dict:
   
   return (jsonify(current_user.to_dict()), 200)
 
+def send_fcm(fcm_tokens, title=None, body=None):
+    push_service = FCMNotification(api_key=app.config['FCM_KEY'])
+    try:
+        if type(fcm_tokens) is list:
+            result = push_service.notify_multiple_devices(registration_ids=fcm_tokens, message_title=title, message_body=body)
+            return result
+        else:
+            result = push_service.notify_single_device(registration_ids=fcm_tokens, message_title=title, message_body=body)
+            return result
+    except errors.InvalidDataError as e:
+        return e
+
+@core.route('send_message', methods=['POST'])
+@login_required
+def send_message() -> Dict:
+  target_id = request.form.get("target_id")
+  target_user = User.query.filter_by(id=int(target_id)).first()
+  tokens = target_user.tokens
+  title = target_id = request.form.get("title")
+  body = request.form.get("body")
+
+  res = send_fcm(tokens, title, body)
+
+  return jsonify(res)
+
+  
