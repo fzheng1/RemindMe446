@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from flask_login import login_user, login_required, logout_user, current_user
+from flask_login import login_user, login_required, logout_user
 from sqlalchemy import desc
 from werkzeug.security import generate_password_hash, check_password_hash
 from .models import User
@@ -28,11 +28,14 @@ def login() -> Dict:
 
 
 @auth.route('/logout')
-@login_required
+#@login_required
 def logout() -> str:
-    name = current_user.name
-    logout_user()
+    name = ""
+    if request.args.get("name"):
+        return f'{name} logged out'
+    
     return f'{name} logged out'
+    
 
 
 @auth.route('/signup', methods=['POST'])
@@ -63,7 +66,7 @@ def signup_post() -> Dict:
 
 
 @auth.route('/users', methods=['GET'])
-@login_required
+#@login_required
 def get_users() -> List[Dict]:
     args = request.args
     
@@ -95,9 +98,10 @@ def get_users() -> List[Dict]:
 
 
 @auth.route('/user', methods=['PATCH'])
-@login_required
+#@login_required
 def update_user() -> Dict:
-    user = User.query.filter_by(id=current_user.id).first()
+    id = request.form.get("id")
+    user = User.query.filter_by(id=id).first()
     
     name = request.form.get('name')
     password = request.form.get('password')
@@ -117,9 +121,10 @@ def update_user() -> Dict:
 
 # logs out and deletes the current user
 @auth.route('/user', methods=['DELETE'])
-@login_required
+#@login_required
 def delete_user() -> Dict:
-    user = User.query.filter_by(id=current_user.id).first()
+    id = request.form.get("id")
+    user = User.query.filter_by(id=id).first()
     ret = jsonify(user.to_dict())
     logout_user()
     

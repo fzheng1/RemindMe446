@@ -2,7 +2,7 @@
 from tokenize import Token
 from flask import Flask, Blueprint, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import login_required, current_user
+from flask_login import login_required
 from .models import User, Group, Responsibility, Token as DBToken
 from . import db
 from typing import List, Dict
@@ -22,10 +22,10 @@ def home():
   return "CS446!!!"
 
 # returns current user
-@core.route("/whoami", methods=['GET'])
-@login_required
-def whoami() -> Dict:
-  return (jsonify(current_user.to_dict()), 200)
+# @core.route("/whoami", methods=['GET'])
+#@login_required
+# def whoami() -> Dict:
+#   return (jsonify(current_user.to_dict()), 200)
 
 
 ####################
@@ -45,13 +45,16 @@ def get_groups() -> List[Dict]:
 
 # Create a group for users not already in groups
 @core.route('/group', methods=['POST'])
-@login_required
+#@login_required
 def create_group() -> Dict:
+  id = request.form.get("id")
   name = request.form.get('name')
   description = request.form.get('description', default="")
+  
+  user = User.query.filter_by(id=id).first()
 
   # we should enforce that a user can only be in 1 group at a time
-  if current_user.group_id:
+  if user.group_id:
     return (jsonify({"ERROR":"USER ALREADY IN GROUP"}), 400)
   
   # group names should be unique ?
@@ -65,7 +68,7 @@ def create_group() -> Dict:
   db.session.flush()
   
   # set each user's group_id to the new group
-  current_user.group_id = new_group.id
+  user.group_id = new_group.id
 
   db.session.commit()
   
@@ -74,27 +77,33 @@ def create_group() -> Dict:
 
 # Get the user's current group
 @core.route('/group', methods=['GET'])
-@login_required
+#@login_required
 def get_group() -> Dict:
-  group = current_user.group
+  id = request.args.get("id")
+  user = User.query.filter_by(id=id).first()
+  group = user.group
   group = group.to_dict() if group else {}
   
   return (jsonify(group), 200)
+
 
 # Leave a group, if a group is empty, delete it and it's chores
 # TODO: when leave a group, set all assigned chores to unassigned
 # TODO: when leave a group as last person, delete all chores for that group
 @core.route('/leave_group', methods=['DELETE'])
-@login_required
+#@login_required
 def leave_group() -> Dict:
+  id = request.form.get("id")
+  user = User.query.filter_by(id=id).first()
+  
   # make sure user is in a group
-  if current_user.group_id == 0:
+  if user.group_id == 0:
     return (jsonify({"ERROR": "USER IS NOT IN GROUP"}), 400)
   
-  group = current_user.group
+  group = user.group
   
   # leave the group
-  current_user.group_id = None
+  user.group_id = None
   
   # if the group has no users we can delete the group
   if not User.query.filter_by(group_id=group.id).all():
@@ -102,12 +111,13 @@ def leave_group() -> Dict:
   
   db.session.commit()
   
-  return (jsonify(current_user.to_dict()), 200)
+  return (jsonify(user.to_dict()), 200)
 
 
 @core.route('/join_group', methods=['POST'])
-@login_required
+#@login_required
 def join_group() -> Dict:
+  id = request.form.get("id")
   group_id = request.form.get("group_id")
   group = Group.query.filter_by(id=int(group_id)).first()
   
@@ -116,15 +126,16 @@ def join_group() -> Dict:
     return (jsonify({"ERROR": "GROUP DOES NOT EXIST"}), 400)
   
   # join the group
-  current_user.group_id = int(group_id)
+  user = User.query.filter_by(id=id).first()
+  user.group_id = int(group_id)
   
   db.session.commit()
   
-  return (jsonify(current_user.to_dict()), 200)
+  return (jsonify(user.to_dict()), 200)
 
 
 @core.route('/badges', methods=['GET'])
-@login_required
+#@login_required
 def get_badges() -> Dict:
   pass
 
@@ -146,7 +157,7 @@ def send_fcm(fcm_tokens, title=None, body=None):
         return e
 
 @core.route('/send_message', methods=['POST'])
-@login_required
+#@login_required
 def send_message() -> Dict:
   target_id = request.form.get("target_id")
   tokens = DBToken.query.filter_by(user_id=int(target_id)).all()
@@ -161,7 +172,7 @@ def send_message() -> Dict:
   return res
 
 @core.route('/token', methods=['POST'])
-@login_required
+#@login_required
 def send_token() -> Dict:
   user_id = request.form.get('user_id')
   token = request.form.get('token')
