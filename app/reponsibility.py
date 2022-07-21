@@ -46,7 +46,7 @@ def create_chore() -> Dict:
 @chore.route('/my_chores', methods=['GET'])
 @login_required
 def view_my_chores() -> Dict:
-    chores = Responsibility.query.filter_by(assignee=current_user.id).order_by(Responsibility.deadline.desc()).all()
+    chores = Responsibility.query.filter_by(assignee=current_user.id).order_by(Responsibility.deadline.desc())
     return (jsonify([c.to_dict() for c in chores.all()]), 200)
 
 
@@ -54,7 +54,7 @@ def view_my_chores() -> Dict:
 @chore.route('/group_chores', methods=['GET'])
 @login_required
 def view_group_chores() -> Dict:
-    chores = Responsibility.query.filter_by(group_id=current_user.group_id).order_by(Responsibility.deadline.desc()).all()
+    chores = Responsibility.query.filter_by(group_id=current_user.group_id).order_by(Responsibility.deadline.desc())
     return (jsonify([c.to_dict() for c in chores.all()]), 200)
 
 
