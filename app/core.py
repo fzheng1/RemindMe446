@@ -23,7 +23,7 @@ def home():
 
 # returns current user
 @core.route("/whoami", methods=['GET'])
-@login_required
+#@login_required
 def whoami() -> Dict:
   return (jsonify(current_user.to_dict()), 200)
 
@@ -45,7 +45,7 @@ def get_groups() -> List[Dict]:
 
 # Create a group for users not already in groups
 @core.route('/group', methods=['POST'])
-@login_required
+#@login_required
 def create_group() -> Dict:
   name = request.form.get('name')
   description = request.form.get('description', default="")
@@ -74,7 +74,7 @@ def create_group() -> Dict:
 
 # Get the user's current group
 @core.route('/group', methods=['GET'])
-@login_required
+#@login_required
 def get_group() -> Dict:
   group = current_user.group
   group = group.to_dict() if group else {}
@@ -85,7 +85,7 @@ def get_group() -> Dict:
 # TODO: when leave a group, set all assigned chores to unassigned
 # TODO: when leave a group as last person, delete all chores for that group
 @core.route('/leave_group', methods=['DELETE'])
-@login_required
+#@login_required
 def leave_group() -> Dict:
   # make sure user is in a group
   if current_user.group_id == 0:
@@ -106,7 +106,7 @@ def leave_group() -> Dict:
 
 
 @core.route('/join_group', methods=['POST'])
-@login_required
+#@login_required
 def join_group() -> Dict:
   group_id = request.form.get("group_id")
   group = Group.query.filter_by(id=int(group_id)).first()
@@ -124,7 +124,7 @@ def join_group() -> Dict:
 
 
 @core.route('/badges', methods=['GET'])
-@login_required
+#@login_required
 def get_badges() -> Dict:
   pass
 
@@ -146,7 +146,7 @@ def send_fcm(fcm_tokens, title=None, body=None):
         return e
 
 @core.route('/send_message', methods=['POST'])
-@login_required
+#@login_required
 def send_message() -> Dict:
   target_id = request.form.get("target_id")
   tokens = DBToken.query.filter_by(user_id=int(target_id)).all()
@@ -161,7 +161,7 @@ def send_message() -> Dict:
   return res
 
 @core.route('/token', methods=['POST'])
-@login_required
+#@login_required
 def send_token() -> Dict:
   user_id = request.form.get('user_id')
   token = request.form.get('token')

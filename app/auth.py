@@ -28,7 +28,7 @@ def login() -> Dict:
 
 
 @auth.route('/logout')
-@login_required
+#@login_required
 def logout() -> str:
     name = current_user.name
     logout_user()
@@ -63,7 +63,7 @@ def signup_post() -> Dict:
 
 
 @auth.route('/users', methods=['GET'])
-@login_required
+#@login_required
 def get_users() -> List[Dict]:
     args = request.args
     
@@ -95,7 +95,7 @@ def get_users() -> List[Dict]:
 
 
 @auth.route('/user', methods=['PATCH'])
-@login_required
+#@login_required
 def update_user() -> Dict:
     user = User.query.filter_by(id=current_user.id).first()
     
@@ -117,7 +117,7 @@ def update_user() -> Dict:
 
 # logs out and deletes the current user
 @auth.route('/user', methods=['DELETE'])
-@login_required
+#@login_required
 def delete_user() -> Dict:
     user = User.query.filter_by(id=current_user.id).first()
     ret = jsonify(user.to_dict())
