@@ -54,7 +54,7 @@ def create_group() -> Dict:
   if current_user.group_id:
     return (jsonify({"ERROR":"USER ALREADY IN GROUP"}), 400)
   
-  # group names should be unique
+  # group names should be unique ?
   if Group.query.filter_by(name=name).first():
     return (jsonify({"ERROR":"GROUP NAME ALREADY TAKEN"}), 400)
   
@@ -121,6 +121,17 @@ def join_group() -> Dict:
   db.session.commit()
   
   return (jsonify(current_user.to_dict()), 200)
+
+
+@core.route('/badges', methods=['GET'])
+@login_required
+def get_badges() -> Dict:
+  pass
+
+
+################
+# NOTIFICATIONS
+################
 
 def send_fcm(fcm_tokens, title=None, body=None):
     push_service = FCMNotification(api_key=FCM_KEY)

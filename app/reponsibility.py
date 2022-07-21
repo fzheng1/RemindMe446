@@ -20,7 +20,10 @@ chore = Blueprint('chore', __name__)
 def create_chore() -> Dict:
     name = request.form.get('name')
     description = request.form.get('description', default="")
-    deadline = request.form.get('deadline')
+    deadline = request.form.get('deadline') # MM-DD-YYYY
+    deadline = datetime.strptime(deadline, '%Y-%m-%d')
+    print(deadline)
+    
     assignee = request.form.get('assignee', default=None)
     assignee = assignee if assignee else None
     group_id = current_user.group_id
@@ -38,19 +41,22 @@ def create_chore() -> Dict:
     
     return (jsonify(new_chore.to_dict()), 201)
     
+    
 # View Chores
 @chore.route('/my_chores', methods=['GET'])
 @login_required
 def view_my_chores() -> Dict:
-    chores = Responsibility.query.filter_by(assignee=current_user.id).all()
-
+    chores = Responsibility.query.filter_by(assignee=current_user.id).order_by(Responsibility.deadline.desc()).all()
     return (jsonify([c.to_dict() for c in chores.all()]), 200)
 
+
+# view chores of the entire group
 @chore.route('/group_chores', methods=['GET'])
 @login_required
 def view_group_chores() -> Dict:
-    chores = Responsibility.query.filter_by(group_id=current_user.group_id).all()
+    chores = Responsibility.query.filter_by(group_id=current_user.group_id).order_by(Responsibility.deadline.desc()).all()
     return (jsonify([c.to_dict() for c in chores.all()]), 200)
+
 
 # Update Chore / mark chore as complete
 @chore.route('/chore', methods=['PATCH'])
@@ -79,6 +85,7 @@ def update_chore() -> Dict:
     db.session.commit()
     
     return (jsonify(chore.to_dict()), 200)
+
 
 # Delete Chore
 @chore.route('/chore', methods=['DELETE'])

@@ -9,6 +9,7 @@ from typing import List, Dict
 
 auth = Blueprint('auth', __name__)
 
+
 @auth.route('/login', methods=["POST"])
 def login() -> Dict:
     email = request.form.get('email')
@@ -25,12 +26,14 @@ def login() -> Dict:
     login_user(user, remember=False)
     return (jsonify(user.to_dict()), 200)
 
+
 @auth.route('/logout')
 @login_required
 def logout() -> str:
     name = current_user.name
     logout_user()
     return f'{name} logged out'
+
 
 @auth.route('/signup', methods=['POST'])
 def signup_post() -> Dict:
@@ -58,6 +61,7 @@ def signup_post() -> Dict:
     
     return (jsonify(new_user.to_dict()), 201)
 
+
 @auth.route('/users', methods=['GET'])
 @login_required
 def get_users() -> List[Dict]:
@@ -77,8 +81,18 @@ def get_users() -> List[Dict]:
         print(str(users))
         return (jsonify([u.to_dict() for u in users.all()]), 200)
     
+    # query by name
+    if args.get("name", default=""):
+        users = User.query.filter_by(name=args.get("name"), default="")
+        print(args.get("group_id", default=0, type=int))
+        print(str(users))
+        return (jsonify([u.to_dict() for u in users.all()]), 200)
+    
     users = User.query
     return (jsonify([u.to_dict() for u in users.all()]), 200)
+
+
+
 
 @auth.route('/user', methods=['PATCH'])
 @login_required

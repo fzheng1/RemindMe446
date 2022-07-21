@@ -22,6 +22,7 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(100))
     name = db.Column(db.String(100))
     about = db.Column(db.String(2000))
+    avatar = db.Column(db.Integer, default=0)
     mmr = db.Column(db.Integer, default=0)
     group_id = db.Column(db.Integer, db.ForeignKey('group.id'))
     responsibilities = db.relationship('Responsibility', backref='user')
