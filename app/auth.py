@@ -100,12 +100,13 @@ def get_users() -> List[Dict]:
 @auth.route('/user', methods=['PATCH'])
 #@login_required
 def update_user() -> Dict:
-    id = request.form.get("id")
+    id = int(request.form.get("id"))
     user = User.query.filter_by(id=id).first()
     
     name = request.form.get('name')
     password = request.form.get('password')
     about = request.form.get('about', default=0, type=int)
+    avatar = request.form.get('avatar', default=0, type=int)
     
     if name:
         user.name = name
@@ -113,6 +114,8 @@ def update_user() -> Dict:
         user.password = generate_password_hash(password, method='sha256')
     if about:
         user.about = about
+    if avatar:
+        user.avatar = avatar
     
     db.session.commit()
     
@@ -123,7 +126,7 @@ def update_user() -> Dict:
 @auth.route('/user', methods=['DELETE'])
 #@login_required
 def delete_user() -> Dict:
-    id = request.form.get("id")
+    id = int(request.form.get("id"))
     user = User.query.filter_by(id=id).first()
     ret = jsonify(user.to_dict())
     logout_user()

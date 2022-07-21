@@ -47,7 +47,7 @@ def get_groups() -> List[Dict]:
 @core.route('/group', methods=['POST'])
 #@login_required
 def create_group() -> Dict:
-  id = request.form.get("id")
+  id = int(request.form.get("id"))
   name = request.form.get('name')
   description = request.form.get('description', default="")
   
@@ -79,7 +79,7 @@ def create_group() -> Dict:
 @core.route('/group', methods=['GET'])
 #@login_required
 def get_group() -> Dict:
-  id = request.args.get("id")
+  id = int(request.args.get("id"))
   user = User.query.filter_by(id=id).first()
   group = user.group
   group = group.to_dict() if group else {}
@@ -93,7 +93,7 @@ def get_group() -> Dict:
 @core.route('/leave_group', methods=['DELETE'])
 #@login_required
 def leave_group() -> Dict:
-  id = request.form.get("id")
+  id = int(request.form.get("id"))
   user = User.query.filter_by(id=id).first()
   
   # make sure user is in a group
@@ -117,9 +117,9 @@ def leave_group() -> Dict:
 @core.route('/join_group', methods=['POST'])
 #@login_required
 def join_group() -> Dict:
-  id = request.form.get("id")
-  group_id = request.form.get("group_id")
-  group = Group.query.filter_by(id=int(group_id)).first()
+  id = int(request.form.get("id"))
+  group_id = int(request.form.get("group_id"))
+  group = Group.query.filter_by(id=group_id).first()
   
   # make sure group exists
   if not group:

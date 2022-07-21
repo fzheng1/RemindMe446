@@ -18,7 +18,7 @@ chore = Blueprint('chore', __name__)
 @chore.route('/chore', methods=['POST'])
 #@login_required
 def create_chore() -> Dict:
-    id = request.form.get('id')
+    id = int(request.form.get("id"))
     name = request.form.get('name')
     description = request.form.get('description', default="")
     deadline = request.form.get('deadline') # MM-DD-YYYY
@@ -47,7 +47,7 @@ def create_chore() -> Dict:
 @chore.route('/my_chores', methods=['GET'])
 #@login_required
 def view_my_chores() -> Dict:
-    id = request.args.get('id')
+    id = int(request.args.get("id"))
     user = User.query.filter_by(id=id).first()
     chores = Responsibility.query.filter_by(assignee=user.id).order_by(Responsibility.deadline.desc())
     return (jsonify([c.to_dict() for c in chores.all()]), 200)
@@ -57,7 +57,7 @@ def view_my_chores() -> Dict:
 @chore.route('/group_chores', methods=['GET'])
 #@login_required
 def view_group_chores() -> Dict:
-    id = request.args.get('id')
+    id = int(request.args.get("id"))
     user = User.query.filter_by(id=id).first()
     chores = Responsibility.query.filter_by(group_id=user.group_id).order_by(Responsibility.deadline.desc())
     return (jsonify([c.to_dict() for c in chores.all()]), 200)
@@ -67,7 +67,7 @@ def view_group_chores() -> Dict:
 @chore.route('/chore', methods=['PATCH'])
 #@login_required
 def update_chore() -> Dict:
-    id = request.form.get('id')
+    id = int(request.form.get("id"))
     name = request.form.get('name')
     description = request.form.get('description')
     deadline = request.form.get('deadline')
@@ -96,7 +96,7 @@ def update_chore() -> Dict:
 @chore.route('/chore', methods=['DELETE'])
 #@login_required
 def delete_chore() -> Dict:
-    id = request.form.get('id')
+    id = int(request.form.get("id"))
     
     chore = Responsibility.query.filter_by(id=id)
     chore.completed_at = datetime.now()
