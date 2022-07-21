@@ -1,11 +1,17 @@
 
+from tokenize import Token
 from flask import Flask, Blueprint, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import login_required, current_user
-from .models import User, Group, Responsibility
+from .models import User, Group, Responsibility, Token as DBToken
 from . import db
 from typing import List, Dict
 from pyfcm import FCMNotification
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+FCM_KEY = os.getenv('FCM_KEY')
 
 core = Blueprint('core', __name__)
 app = Flask(__name__)
@@ -117,28 +123,50 @@ def join_group() -> Dict:
   return (jsonify(current_user.to_dict()), 200)
 
 def send_fcm(fcm_tokens, title=None, body=None):
-    push_service = FCMNotification(api_key=app.config['FCM_KEY'])
+    push_service = FCMNotification(api_key=FCM_KEY)
     try:
         if type(fcm_tokens) is list:
             result = push_service.notify_multiple_devices(registration_ids=fcm_tokens, message_title=title, message_body=body)
             return result
         else:
-            result = push_service.notify_single_device(registration_ids=fcm_tokens, message_title=title, message_body=body)
+            result = push_service.notify_single_device(registration_id=fcm_tokens, message_title=title, message_body=body)
             return result
-    except errors.InvalidDataError as e:
+    except Exception as e:
         return e
 
-@core.route('send_message', methods=['POST'])
+@core.route('/send_message', methods=['POST'])
 @login_required
 def send_message() -> Dict:
   target_id = request.form.get("target_id")
-  target_user = User.query.filter_by(id=int(target_id)).first()
-  tokens = target_user.tokens
+  tokens = DBToken.query.filter_by(user_id=int(target_id)).all()
+  tokens = [t.token for t in tokens]
   title = target_id = request.form.get("title")
   body = request.form.get("body")
 
   res = send_fcm(tokens, title, body)
 
-  return jsonify(res)
+  print(res)
+
+  return res
+
+@core.route('/token', methods=['POST'])
+@login_required
+def send_token() -> Dict:
+  user_id = request.form.get('user_id')
+  token = request.form.get('token')
+  
+  existing_token = DBToken.query.filter_by(token=token).first()
+
+  if existing_token:
+    existing_token.user_id = user_id
+    db.session.commit()
+    return (jsonify(existing_token.to_dict()), 200)
+
+  else:
+    new_token = DBToken(user_id=user_id, token=token)
+    db.session.add(new_token)
+    db.session.flush()
+    db.session.commit()
+    return (jsonify(new_token.to_dict()), 200)
 
   
