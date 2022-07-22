@@ -3,6 +3,7 @@ from enum import unique
 from flask_login import UserMixin
 from . import db
 from sqlalchemy.sql import func
+from datetime import datetime
 
 class Token(db.Model):
     def to_dict(self):
@@ -45,7 +46,10 @@ class Group(db.Model):
 
 class Responsibility(db.Model):
     def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        ret = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        if ret.get("deadline"):
+            ret["deadline"] = datetime.strptime(getattr(self, "deadline"), '%Y-%m-%d')
+        return ret
     
     # __abstract__ = True
     id = db.Column(db.Integer, primary_key=True)
