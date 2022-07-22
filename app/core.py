@@ -174,10 +174,19 @@ def get_badges() -> Dict:
       ret.append(3)
   
   # productive duck
+  today = datetime.now()
+  delta = datetime.timedelta(days = 7)
+  one_week_ago = today - delta
+  chores_last_week = (Responsibility.query
+        .filter_by(assignee=user.id)
+        .filter(Responsibility.completed_at.isnot(None))
+        .filter(Responsibility.completed_at >= one_week_ago)
+        .all()
+    )
+  if len(chores_last_week >= 10):
+    ret.append(4)
   
-  
-  
-  return(jsonify([0, 1, 2, 3, 4]), 200)
+  return(jsonify(ret), 200)
 
 
 ################
