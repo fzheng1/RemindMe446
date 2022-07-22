@@ -112,7 +112,8 @@ def update_chore() -> Dict:
     if description:
         chore.description = description
     if deadline:
-        chore.deadline = deadline # not sure if this is datetime object might have to cast it
+        deadline = datetime.strptime(deadline, '%Y-%m-%d')
+        chore.deadline = deadline
     if assignee:
         chore.assignee = int(assignee)
     if completed:

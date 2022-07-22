@@ -8,6 +8,7 @@ from . import db
 from typing import List, Dict
 from pyfcm import FCMNotification
 from dotenv import load_dotenv
+from datetime import datetime, time
 import os
 
 load_dotenv()
@@ -139,8 +140,44 @@ def join_group() -> Dict:
 def get_badges() -> Dict:
   id = int(request.args.get("id"))
   user = User.query.filter_by(id=id).first()
+  chores = (Responsibility.query
+        .filter_by(assignee=user.id)
+        .filter(Responsibility.completed_at.isnot(None))
+        .all()
+    )
+  ret = []
   
-  return(jsonify([0, 1, 2, 3, 4, 5, 6]), 200)
+  # popular dog
+  group_size = len(User.query.filter_by(group_id=user.group_id).all())
+  if group_size > 5:
+    ret.append(0)
+  
+  # chore star
+  if len(chores) > 20:
+    ret.append(1)
+  
+  # night lurker / early bird
+  for chore in chores:
+    # 12am - 5am
+    nl_s = time(0)
+    nl_e = time(5)
+    # 5am - 9am
+    eb_s = time(5)
+    eb_e = time(9)
+    
+    chore_time = chore.completed_at.time()
+    
+    if chore_time >= nl_s and chore_time < nl_e:
+      ret.append(2)
+    
+    if chore_time >= eb_s and chore_time < eb_e:
+      ret.append(3)
+  
+  # productive duck
+  
+  
+  
+  return(jsonify([0, 1, 2, 3, 4]), 200)
 
 
 ################
