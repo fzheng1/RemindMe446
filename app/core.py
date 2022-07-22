@@ -145,16 +145,16 @@ def get_badges() -> Dict:
         .filter(Responsibility.completed_at.isnot(None))
         .all()
     )
-  ret = []
+  ret = {"list": []}
   
   # popular dog
   group_size = len(User.query.filter_by(group_id=user.group_id).all())
   if group_size > 5:
-    ret.append(0)
+    ret["list"].append(0)
   
   # chore star
   if len(chores) > 20:
-    ret.append(1)
+    ret["list"].append(1)
   
   # night lurker / early bird
   for chore in chores:
@@ -168,10 +168,10 @@ def get_badges() -> Dict:
     chore_time = chore.completed_at.time()
     
     if chore_time >= nl_s and chore_time < nl_e:
-      ret.append(2)
+      ret["list"].append(2)
     
     if chore_time >= eb_s and chore_time < eb_e:
-      ret.append(3)
+      ret["list"].append(3)
   
   # productive duck
   today = datetime.now()
@@ -184,7 +184,7 @@ def get_badges() -> Dict:
         .all()
     )
   if len(chores_last_week) >= 10:
-    ret.append(4)
+    ret["list"].append(4)
   
   return(jsonify(ret), 200)
 
