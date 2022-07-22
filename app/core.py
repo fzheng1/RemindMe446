@@ -146,10 +146,10 @@ def get_badges() -> Dict:
         .all()
     )
   ret = {
-    0: False,
-    2: False,
-    3: False,
-    4: False,
+    "0": False,
+    "2": False,
+    "3": False,
+    "4": False,
   }
   # ret = {"list": []}
   
