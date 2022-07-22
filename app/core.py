@@ -139,8 +139,8 @@ def join_group() -> Dict:
 def get_badges() -> Dict:
   id = int(request.args.get("id"))
   user = User.query.filter_by(id=id).first()
-  pass
-  # return(jsonify([]), 200)
+  
+  return(jsonify([0, 1, 2, 3, 4, 5, 6]), 200)
 
 
 ################
