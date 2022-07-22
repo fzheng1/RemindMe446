@@ -49,7 +49,11 @@ def create_chore() -> Dict:
 def view_my_chores() -> Dict:
     id = int(request.args.get("id"))
     user = User.query.filter_by(id=id).first()
-    chores = Responsibility.query.filter_by(assignee=user.id).order_by(Responsibility.deadline.desc())
+    chores = (Responsibility.query
+        .filter_by(assignee=user.id)
+        .filter(Responsibility.completed_at.is_(None))
+        .order_by(Responsibility.deadline.desc())
+    )
     return (jsonify([c.to_dict() for c in chores.all()]), 200)
 
 
@@ -59,7 +63,11 @@ def view_my_chores() -> Dict:
 def view_group_chores() -> Dict:
     id = int(request.args.get("id"))
     user = User.query.filter_by(id=id).first()
-    chores = Responsibility.query.filter_by(group_id=user.group_id).order_by(Responsibility.deadline.desc())
+    chores = (Responsibility.query
+        .filter_by(group_id=user.group_id)
+        .filter(Responsibility.completed_at.is_(None))
+        .order_by(Responsibility.deadline.desc())
+    )
     return (jsonify([c.to_dict() for c in chores.all()]), 200)
 
 
