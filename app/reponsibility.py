@@ -74,7 +74,7 @@ def update_chore() -> Dict:
     assignee = request.form.get('assignee')
     completed = request.form.get('completed', default=False)
 
-    chore = Responsibility.query.filter_by(id=id)
+    chore = Responsibility.query.filter_by(id=id).first()
     
     if name:
         chore.name = name
@@ -98,7 +98,7 @@ def update_chore() -> Dict:
 def delete_chore() -> Dict:
     id = int(request.form.get("id"))
     
-    chore = Responsibility.query.filter_by(id=id)
+    chore = Responsibility.query.filter_by(id=id).first()
     chore.completed_at = datetime.now()
     
     db.session.commit()
