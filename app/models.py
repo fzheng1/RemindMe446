@@ -48,7 +48,7 @@ class Responsibility(db.Model):
     def to_dict(self):
         ret = {c.name: getattr(self, c.name) for c in self.__table__.columns}
         if ret.get("deadline"):
-            ret["deadline"] = datetime.strptime(getattr(self, "deadline"), '%Y-%m-%d')
+            ret["deadline"] = datetime.strftime(getattr(self, "deadline"), '%Y-%m-%d')
         return ret
     
     # __abstract__ = True
