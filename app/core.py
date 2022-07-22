@@ -183,7 +183,7 @@ def get_badges() -> Dict:
         .filter(Responsibility.completed_at >= one_week_ago)
         .all()
     )
-  if len(chores_last_week >= 10):
+  if len(chores_last_week) >= 10:
     ret.append(4)
   
   return(jsonify(ret), 200)
