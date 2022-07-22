@@ -115,7 +115,10 @@ def update_chore() -> Dict:
         deadline = datetime.strptime(deadline, '%Y-%m-%d')
         chore.deadline = deadline
     if assignee:
-        chore.assignee = int(assignee)
+        try:
+            chore.assignee = int(assignee)
+        except:
+            chore.assignee = None
     if completed:
         chore.completed_at = datetime.now()
     
