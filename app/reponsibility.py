@@ -1,6 +1,7 @@
 from datetime import datetime
 from flask import Flask, Blueprint, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import extract
 from flask_login import login_required
 from .models import User, Group, Responsibility
 from . import db
@@ -48,12 +49,22 @@ def create_chore() -> Dict:
 #@login_required
 def view_my_chores() -> Dict:
     id = int(request.args.get("id"))
+    month = request.args.get("month")
+    day = request.args.get("day")
+    
     user = User.query.filter_by(id=id).first()
     chores = (Responsibility.query
         .filter_by(assignee=user.id)
         .filter(Responsibility.completed_at.is_(None))
-        .order_by(Responsibility.deadline.desc())
     )
+    
+    if month:
+        chores.filter(extract('month', Responsibility.deadline)==int(month))
+        
+    if day:
+        chores.filter(extract('day', Responsibility.deadline)==int(month))
+    
+    chores.order_by(Responsibility.deadline.desc())
     return (jsonify([c.to_dict() for c in chores.all()]), 200)
 
 
@@ -62,13 +73,25 @@ def view_my_chores() -> Dict:
 #@login_required
 def view_group_chores() -> Dict:
     id = int(request.args.get("id"))
+    month = request.args.get("month")
+    day = request.args.get("day")
+    
     user = User.query.filter_by(id=id).first()
     chores = (Responsibility.query
         .filter_by(group_id=user.group_id)
         .filter(Responsibility.completed_at.is_(None))
-        .order_by(Responsibility.deadline.desc())
     )
+    
+    if month:
+        chores.filter(extract('month', Responsibility.deadline)==int(month))
+        
+    if day:
+        chores.filter(extract('day', Responsibility.deadline)==int(month))
+    
+    chores.order_by(Responsibility.deadline.desc())
     return (jsonify([c.to_dict() for c in chores.all()]), 200)
+
+
 
 
 # Update Chore / mark chore as complete
