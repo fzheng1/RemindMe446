@@ -8,7 +8,7 @@ from . import db
 from typing import List, Dict
 from pyfcm import FCMNotification
 from dotenv import load_dotenv
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 import os
 
 load_dotenv()
@@ -175,7 +175,7 @@ def get_badges() -> Dict:
   
   # productive duck
   today = datetime.now()
-  delta = datetime.timedelta(days = 7)
+  delta = timedelta(days = 7)
   one_week_ago = today - delta
   chores_last_week = (Responsibility.query
         .filter_by(assignee=user.id)
