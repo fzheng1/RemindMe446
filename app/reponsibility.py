@@ -109,7 +109,7 @@ def delete_chore() -> Dict:
 # Hard Delete Chore
 @chore.route('/hard_delete_chore', methods=['DELETE'])
 #@login_required
-def delete_chore() -> Dict:
+def hard_delete_chore() -> Dict:
     id = int(request.form.get("id"))
     
     chore = Responsibility.query.filter_by(id=id).first()
