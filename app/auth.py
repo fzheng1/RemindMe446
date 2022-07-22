@@ -105,7 +105,7 @@ def update_user() -> Dict:
     
     name = request.form.get('name')
     password = request.form.get('password')
-    about = request.form.get('about', default=0, type=int)
+    about = request.form.get('about', default="")
     avatar = request.form.get('avatar', default=0, type=int)
     
     if name:
