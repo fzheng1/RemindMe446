@@ -86,7 +86,7 @@ def view_group_chores() -> Dict:
         chores.filter(extract('month', Responsibility.deadline)==int(month))
         
     if day:
-        chores.filter(extract('day', Responsibility.deadline)==int(month))
+        chores.filter(extract('day', Responsibility.deadline)==int(day))
     
     chores.order_by(Responsibility.deadline.desc())
     return (jsonify([c.to_dict() for c in chores.all()]), 200)
