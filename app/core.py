@@ -137,7 +137,10 @@ def join_group() -> Dict:
 @core.route('/badges', methods=['GET'])
 #@login_required
 def get_badges() -> Dict:
+  id = int(request.args.get("id"))
+  user = User.query.filter_by(id=id).first()
   pass
+  # return(jsonify([]), 200)
 
 
 ################

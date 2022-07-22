@@ -92,7 +92,7 @@ def update_chore() -> Dict:
     return (jsonify(chore.to_dict()), 200)
 
 
-# Delete Chore
+# mark chore done
 @chore.route('/chore', methods=['DELETE'])
 #@login_required
 def delete_chore() -> Dict:
@@ -104,3 +104,18 @@ def delete_chore() -> Dict:
     db.session.commit()
     
     return (jsonify(chore.to_dict()), 200)
+
+
+# Hard Delete Chore
+@chore.route('/hard_delete_chore', methods=['DELETE'])
+#@login_required
+def delete_chore() -> Dict:
+    id = int(request.form.get("id"))
+    
+    chore = Responsibility.query.filter_by(id=id).first()
+    ret = jsonify(chore.to_dict())
+    
+    db.session.delete(chore)
+    db.session.commit()
+    
+    return (ret, 200)
