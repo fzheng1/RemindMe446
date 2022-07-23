@@ -83,7 +83,7 @@ def get_users() -> List[Dict]:
         group_id = args.get("group_id", default=-1, type=int)
         
         if group_id == -1:
-            users = users.filter(Group.group_id.is_(None))
+            users = users.filter(User.group_id.is_(None))
         else:
             users = users.filter_by(group_id=group_id)
         
