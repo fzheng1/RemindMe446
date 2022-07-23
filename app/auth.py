@@ -69,7 +69,7 @@ def signup_post() -> Dict:
 #@login_required
 def get_users() -> List[Dict]:
     args = request.args
-    users = Users.query
+    users = User.query
     
     # if we search by id we return a single user
     if args.get("id", default=0, type=int):
