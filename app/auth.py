@@ -79,8 +79,8 @@ def get_users() -> List[Dict]:
         return (jsonify([users.first().to_dict()]), 200)
     
     # query by group
-    if args.get("group_id", default=0, type=int):
-        group_id = args.get("group_id", default=0, type=int)
+    if args.get("group_id", default=-1, type=int):
+        group_id = args.get("group_id", default=-1, type=int)
         
         if group_id == -1:
             users = users.filter(Group.group_id.is_(None))
