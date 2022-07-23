@@ -72,14 +72,14 @@ def get_users() -> List[Dict]:
     users = User.query
     
     # if we search by id we return a single user
-    if args.get("id", default=0, type=int):
+    if args.get("id"):
         users = User.query.filter_by(id=args.get("id", default=0, type=int))
         print(args.get("id", default=0, type=int))
         print(str(users))
         return (jsonify([users.first().to_dict()]), 200)
     
     # query by group
-    if args.get("group_id", default=-1, type=int):
+    if args.get("group_id"):
         group_id = args.get("group_id", default=-1, type=int)
         
         if group_id == -1:
@@ -89,7 +89,7 @@ def get_users() -> List[Dict]:
         
     
     # query by name
-    if args.get("name", default=""):
+    if args.get("name"):
         users = users.filter_by(name=args.get("name"), default="")
     
 
