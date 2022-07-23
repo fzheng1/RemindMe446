@@ -69,6 +69,7 @@ def signup_post() -> Dict:
 #@login_required
 def get_users() -> List[Dict]:
     args = request.args
+    users = Users.query
     
     # if we search by id we return a single user
     if args.get("id", default=0, type=int):
@@ -79,19 +80,19 @@ def get_users() -> List[Dict]:
     
     # query by group
     if args.get("group_id", default=0, type=int):
-        users = User.query.filter_by(group_id=args.get("group_id", default=0, type=int))
-        print(args.get("group_id", default=0, type=int))
-        print(str(users))
-        return (jsonify([u.to_dict() for u in users.all()]), 200)
+        group_id = args.get("group_id", default=0, type=int)
+        
+        if group_id == -1:
+            users = users.filter(Group.group_id.is_(None))
+        else:
+            users = users.filter_by(group_id=group_id)
+        
     
     # query by name
     if args.get("name", default=""):
-        users = User.query.filter_by(name=args.get("name"), default="")
-        print(args.get("group_id", default=0, type=int))
-        print(str(users))
-        return (jsonify([u.to_dict() for u in users.all()]), 200)
+        users = users.filter_by(name=args.get("name"), default="")
     
-    users = User.query
+
     return (jsonify([u.to_dict() for u in users.all()]), 200)
 
 
