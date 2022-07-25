@@ -199,13 +199,6 @@ def get_badges() -> Dict:
   if len(chores_last_week) >= 10:
     ret[4].append(4)
   
-  ret = {
-    "0": True,
-    "1": True,
-    "2": True,
-    "3": True,
-    "4": True
-  }
   return(jsonify(ret), 200)
 
 
