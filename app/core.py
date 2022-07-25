@@ -103,6 +103,11 @@ def leave_group() -> Dict:
   
   group = user.group
   
+  # unassign all chores in the group for the user
+  chores = Responsibility.query.filter_by(group_id=group.id).filter_by(assignee=user.id).all()
+  for chore in chores:
+    chore.assignee = None
+  
   # leave the group
   user.group_id = None
   
